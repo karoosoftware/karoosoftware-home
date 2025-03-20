@@ -9,9 +9,27 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Copy the file downloadUnzip.bash to the dist folder
+if [ -f "./downloadUnzip.bash" ]; then
+    if [ -d "./dist" ]; then
+        cp ./downloadUnzip.bash ./dist/
+        if [ $? -ne 0 ]; then
+            echo "Failed to copy downloadUnzip.bash to ./dist. Exiting."
+            exit 1
+        fi
+        echo "downloadUnzip.bash copied to ./dist successfully."
+    else
+        echo "Directory './dist' does not exist. Exiting."
+        exit 1
+    fi
+else
+    echo "File 'downloadUnzip.bash' does not exist in the current location. Exiting."
+    exit 1
+fi
+
 # Check if the ./dist directory exists
 if [ -d "./dist" ]; then
-    tar -czf dist.tar.gz ./dist
+    tar -czf dist.tar.gz -C ./dist .
     if [ $? -ne 0 ]; then
         echo "Compression failed. Exiting."
         exit 1
@@ -22,7 +40,7 @@ else
     exit 1
 fi
 
-# Upload to S3
+# Uploaded to LightSail bucket
 aws s3api put-object --bucket karoosoftware --key karoosoftware/dist --body ./dist.tar.gz --acl bucket-owner-full-control
 if [ $? -ne 0 ]; then
     echo "S3 upload failed. Exiting."
